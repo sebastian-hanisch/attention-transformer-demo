@@ -187,3 +187,7 @@ streamlit run app.py
 - Gu, A. & Dao, T. (2023/2024). *Mamba: Linear-Time Sequence Modeling with Selective State
   Spaces.* (State-Space-Modelle als linearer Ausblick zum quadratischen Attention-Aufwand –
   bewusst nicht gebaut, siehe SOTA-Hinweis in der App.)
+
+---
+
+Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zur Reihe: [Neuronale Netze: vom Perceptron zum Transformer](https://sebastianhanisch.net/konzepte-neuronale-netze.html).
