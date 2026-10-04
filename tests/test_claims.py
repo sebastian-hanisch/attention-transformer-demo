@@ -18,17 +18,19 @@ def t_sweep_rows():
     return ev.t_sweep()
 
 
-def test_claim_sensitivity_rnn_underflows_by_T_300(sensitivity_rows):
+def test_claim_sensitivity_rnn_vanishes_geometrically(sensitivity_rows):
+    """RNN: praktisch null, aber (exakt per Complex-Step gemessen) keine Gleitkomma-Null."""
     by_T = {r["T"]: r for r in sensitivity_rows}
-    assert by_T[300]["rnn"] == 0.0
-    assert by_T[600]["rnn"] == 0.0
-    assert by_T[1200]["rnn"] == 0.0
+    assert 1e-22 < by_T[300]["rnn"] < 1e-20   # README: 5,84e-21
+    assert 1e-42 < by_T[600]["rnn"] < 1e-40   # 4,87e-41
+    assert 1e-84 < by_T[1200]["rnn"] < 1e-82  # 1,38e-83
 
 
 def test_claim_sensitivity_attention_stays_usable_at_T_1200(sensitivity_rows):
     by_T = {r["T"]: r for r in sensitivity_rows}
     assert by_T[1200]["attention"] > 1e-4
-    assert by_T[1200]["lstm"] < 1e-10  # winzig, aber ungleich RNNs exaktem 0.0
+    assert 1e-24 < by_T[1200]["lstm"] < 1e-22  # README: 1,03e-23 (LSTM >> RNN)
+    assert by_T[1200]["rnn"] < by_T[1200]["lstm"]
 
 
 def test_claim_sensitivity_ordering_holds_across_all_T(sensitivity_rows):

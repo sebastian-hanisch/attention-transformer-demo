@@ -154,8 +154,9 @@ st.plotly_chart(viz.build_sensitivity_figure(sens_rows), key="sensitivity_chart"
 st.caption(
     "Bei EINER festen Zufallsinitialisierung (kein Training nötig - schnell, deterministisch, "
     "plattformrobust) gemessen: wie stark ändert sich die Ausgabe, wenn sich der Wert an "
-    "Position 0 winzig ändert? Beim RNN fällt das exponentiell auf exakt 0.0 (Gleitkomma-"
-    "Unterlauf) - beim LSTM viel langsamer, aber auch geometrisch fallend. Bei Attention fällt "
+    "Position 0 winzig ändert? Beim RNN fällt das exponentiell (bei T=1200 auf etwa 1e-83 - "
+    "in float64 noch darstellbar, aber praktisch null) - beim LSTM viel langsamer, aber auch "
+    "geometrisch fallend. Bei Attention fällt "
     "es nur MILDE (durch die Softmax-Mittelung über mehr Positionen verdünnt) und bleibt auch "
     "bei T=1200 eine normale, benutzbare Zahl."
 )

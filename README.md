@@ -24,9 +24,9 @@ Perceptron (WURZEL)                              [gebaut]
 
 **Ergebnis in Kürze:** Bei einer festen, UNTRAINIERTEN Zufallsinitialisierung gemessen, wie stark
 sich die Ausgabe ändert, wenn sich der Eingabewert an der Signalposition winzig ändert
-($|\partial s/\partial x_0|$): das RNN fällt exponentiell auf exakt $0{,}0$ (Gleitkomma-Unterlauf,
-spätestens bei $T=300$), das LSTM fällt langsamer, aber ebenfalls geometrisch (bei $T=1200$ nur
-noch $5{,}2\cdot10^{-14}$), Attention fällt nur **mild** (durch die Softmax-Mittelung über mehr
+($|\partial s/\partial x_0|$): das RNN fällt exponentiell (bei $T=300$ schon $\approx 6\cdot10^{-21}$, bei $T=1200$
+$\approx 1\cdot10^{-83}$ – noch darstellbar, aber praktisch null), das LSTM fällt langsamer, aber
+ebenfalls geometrisch (bei $T=1200$ nur noch $\approx 1\cdot10^{-23}$), Attention fällt nur **mild** (durch die Softmax-Mittelung über mehr
 Positionen verdünnt) und bleibt bei $T=1200$ eine normale, benutzbare Zahl ($\approx 10^{-3}$).
 **Aber:** diese viel mildere Verdünnung übersetzt sich NICHT automatisch in zuverlässiges
 Kaltstart-Training bei jedem $T$ – bei diesem einfachen Aufbau (ein Kopf, keine Stapelverarbeitung)
@@ -44,7 +44,7 @@ Eingabeschritt. Diese Demo prüft, ob das die in Stück 4/5 gefundenen Probleme 
 
 | Hypothese | Ergebnis |
 |---|---|
-| Sensitivität auf die Signalposition bleibt über einen viel größeren $T$-Bereich brauchbar als bei RNN/LSTM | ✅ bei $T=1200$: RNN exakt $0{,}0$, LSTM $5{,}2\cdot10^{-14}$, Attention $1{,}0\cdot10^{-3}$ |
+| Sensitivität auf die Signalposition bleibt über einen viel größeren $T$-Bereich brauchbar als bei RNN/LSTM | ✅ bei $T=1200$: RNN $1{,}4\cdot10^{-83}$, LSTM $1{,}0\cdot10^{-23}$, Attention $1{,}0\cdot10^{-3}$ |
 | Gradienten-Check (Rückwärtspass durch Softmax-Aufmerksamkeit) unter $10^{-6}$ | ✅ $1{,}6\cdot10^{-8}$ |
 | Entartete (quasi-One-Hot) Aufmerksamkeit reduziert sich exakt auf $\text{out}=v_j$ | ✅ identische Ausgabe ($0{,}186265=0{,}186265$) |
 | ⚠️ **Ehrlich geprüft, nicht einfach angenommen:** die viel mildere Verdünnung reicht automatisch für hohe Kaltstart-Erfolgsquote bei jedem $T$ | ❌ **Reicht nicht automatisch** – Erfolgsquote sinkt trotzdem mit $T$ (100 % → 0 % zwischen $T=10$ und $T=150$), nur langsamer und aus einem anderen Grund als beim RNN (siehe unten) |
@@ -60,10 +60,10 @@ Zufallsinitialisierung, keine Trainingsvarianz, daher exakte Werte statt Toleran
 | 10 | 0,00327 | 0,0726 | 0,106 |
 | 40 | 7,4·10⁻⁵ | 0,00401 | 0,0387 |
 | 80 | 2,50·10⁻⁷ | 0,00341 | 0,0197 |
-| 150 | 9,44·10⁻¹² | 0,00423 | 0,0116 |
-| 300 | 0,0 | 5,96·10⁻⁵ | 0,00588 |
-| 600 | 0,0 | 2,12·10⁻¹¹ | 0,00234 |
-| 1200 | 0,0 | 5,20·10⁻¹⁴ | 0,00102 |
+| 150 | 9,25·10⁻¹² | 0,00423 | 0,0116 |
+| 300 | 5,84·10⁻²¹ | 5,96·10⁻⁵ | 0,00588 |
+| 600 | 4,87·10⁻⁴¹ | 2,13·10⁻¹¹ | 0,00234 |
+| 1200 | 1,38·10⁻⁸³ | 1,03·10⁻²³ | 0,00102 |
 
 Bei sehr kleinem $T$ ($\le10$) ist die Reihenfolge noch nicht sauber getrennt (Zufallsinit-Rauschen
 dominiert) – ab $T=40$ gilt durchgehend RNN ≤ LSTM ≤ Attention, mit wachsendem Abstand.
@@ -118,6 +118,14 @@ plattformrobuste Werte). Der Kaltstart-Erfolgsquote-Sweep bleibt als ehrlicher N
 erhalten (mit Toleranzband getestet), zeigt aber, dass die mildere Verdünnung allein nicht
 automatisch zu einer flachen Erfolgsquote-Kurve führt.
 
+**Korrektur der Empfindlichkeitsmessung (Orakel-Prüfung 2026-10):** Die Empfindlichkeit wurde zuerst per
+finiter Differenz ($\varepsilon=10^{-4}$) gemessen. Deren Rundungsrauschen ($\sim10^{-13}$) verschluckt jeden
+Wert darunter und meldete beim RNN ab $T=300$ „exakt $0{,}0$“ (Gleitkomma-Unterlauf) und beim LSTM bei
+$T=1200$ $5{,}2\cdot10^{-14}$ – beides Messartefakte. Der wahre Wert (unabhängige Tangentenrechnung und
+Complex-Step stimmen überein) ist beim RNN $1{,}4\cdot10^{-83}$ und beim LSTM $1{,}0\cdot10^{-23}$ bei $T=1200$,
+in float64 durchaus darstellbar. Die Messung nutzt jetzt Complex-Step; die Reihenfolge RNN ≤ LSTM ≤ Attention
+ändert sich nicht, nur die Behauptung „fällt auf exakt Null“.
+
 **Grenzen:** ein Kopf, eine Schicht (echte Transformer stapeln viele Köpfe/Schichten). Nur
 Positions-, keine relative Ordnungskodierung. Kein Multi-Head, keine Lernraten-Zeitpläne, kein
 Layer-Norm/Residual – bewusst außerhalb dieses Rahmens, um jeden Mechanismus einzeln
@@ -125,13 +133,15 @@ nachvollziehbar zu halten.
 
 ## Tests
 
-28 Tests, `python -m pytest tests/ -v` (Laufzeit lokal ca. 27 Sekunden – deutlich schneller als
+32 Tests, `python -m pytest tests/ -v` (Laufzeit lokal ca. 27 Sekunden – deutlich schneller als
 rnn-demo/lstm-demo, da der Hauptbefund trainingsfrei ist):
 - `test_scenario.py` – Reproduzierbarkeit, Signalposition, Klassenbalance.
 - `test_model.py` – Forward/Backward, Gradienten-Check, Positionskodierung, Sensitivitäts-Ordnung,
   Korrektheits-Kette, Trainings-Rauchtest.
 - `test_evaluation.py` – Sweep-Funktionen mit billigen Parametern (Korrektheit, nicht die
   offiziellen Zahlen).
+- `test_oracle_attention.py` – unabhängige Orakel: eigene Vorwärts-Tangentenrechnung für die
+  Empfindlichkeit (RNN/LSTM/Attention bis $T=1200$), finite Differenz, Complex-Step-Gradient der Attention.
 - `test_claims.py` – jede Zahl oben nachgerechnet, mit Toleranzband (Modul-Fixtures berechnen
   jeden Sweep nur einmal).
 - `test_presets.py`, `test_app.py` – Presets, Regler-Extremwerte, Footer.

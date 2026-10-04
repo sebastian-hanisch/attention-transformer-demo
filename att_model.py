@@ -16,6 +16,12 @@ def sigmoid(z):
     return 1.0 / (1.0 + np.exp(-z))
 
 
+def _scalar(v):
+    """float fuer reelle Eingaben (unveraendertes Verhalten); komplexe Werte bleiben komplex,
+    damit die Empfindlichkeit per Complex-Step exakt berechnet werden kann."""
+    return v if np.iscomplexobj(v) else float(v)
+
+
 def softmax(z):
     z = z - np.max(z)
     e = np.exp(z)
@@ -60,7 +66,7 @@ class Attention:
         scores = (K @ p["q"]) / np.sqrt(self.d)
         alpha = softmax(scores)
         out = alpha @ V
-        s = float(p["Why"] @ out + p["by"])
+        s = _scalar(p["Why"] @ out + p["by"])
         cache = dict(seq=seq, E=E, K=K, V=V, alpha=alpha, out=out)
         return s, cache
 
@@ -124,7 +130,7 @@ class RNN:
             z = p["Wxh"][:, 0] * seq[t] + p["Whh"] @ h + p["bh"]
             h = np.tanh(z)
             hs.append(h)
-        s = float(p["Why"] @ hs[-1] + p["by"])
+        s = _scalar(p["Why"] @ hs[-1] + p["by"])
         return s, hs
 
     def backward(self, y: float, s: float, hs: list, seq: np.ndarray):
@@ -190,7 +196,7 @@ class LSTM:
             cache["g"].append(g)
             cache["c"].append(c)
             cache["h"].append(h)
-        s = float(p["Why"] @ cache["h"][-1] + p["by"])
+        s = _scalar(p["Why"] @ cache["h"][-1] + p["by"])
         return s, cache
 
     def backward(self, y: float, s: float, cache: dict, seq: np.ndarray):
@@ -279,25 +285,21 @@ def accuracy(model, X: np.ndarray, y: np.ndarray) -> float:
     return correct / len(y)
 
 
-def sensitivity_to_signal(model, T: int, seed: int = 1, eps: float = 1e-4) -> float:
-    """|d(score)/d(x_0)| via finite Differenzen, an EINER festen (nicht
-    trainierten) Zufallsinitialisierung - schnell, deterministisch, kein
-    Training noetig. Direktes Mass dafuer, ob Information von Position 0
-    ueberhaupt am Ausgang ankommt."""
+def sensitivity_to_signal(model, T: int, seed: int = 1, eps: float = 1e-10) -> float:
+    """|d(score)/d(x_0)| EXAKT per Complex-Step-Ableitung (Im[s(x_0 + i*eps)]/eps), an EINER
+    festen (nicht trainierten) Zufallsinitialisierung - schnell, deterministisch, kein
+    Training noetig. Direktes Mass dafuer, ob Information von Position 0 ueberhaupt am
+    Ausgang ankommt.
+
+    Keine finite Differenz: deren Rundungsrauschen (~1e-13 bei eps=1e-4) verschluckt jede
+    Empfindlichkeit unterhalb davon und meldet dann 0.0, obwohl der wahre Wert (z. B. RNN
+    bei T=1200 etwa 1e-83) in float64 durchaus darstellbar ist. Complex-Step hat keine
+    Subtraktion und bleibt exakt, bis eps*Wert in float64 unterlaeuft (Wert < ~1e-300);
+    der Abbruchfehler ist ~eps^2 (relativ ~1e-20)."""
     rng = np.random.default_rng(seed)
     import att_scenario as sc
     seq, _ = sc.make_sequence(rng, T)
-    seq_plus = seq.copy()
-    seq_plus[0] += eps
-    seq_minus = seq.copy()
-    seq_minus[0] -= eps
-    if isinstance(model, Attention):
-        s_plus, _ = model.forward(seq_plus)
-        s_minus, _ = model.forward(seq_minus)
-    elif isinstance(model, LSTM):
-        s_plus, _ = model.forward(seq_plus)
-        s_minus, _ = model.forward(seq_minus)
-    else:
-        s_plus, _ = model.forward(seq_plus)
-        s_minus, _ = model.forward(seq_minus)
-    return abs((s_plus - s_minus) / (2 * eps))
+    seq_c = seq.astype(complex)
+    seq_c[0] += 1j * eps
+    s, _ = model.forward(seq_c)
+    return abs(float(np.imag(s)) / eps)

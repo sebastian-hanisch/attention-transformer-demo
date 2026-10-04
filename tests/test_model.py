@@ -43,12 +43,12 @@ def test_reduction_check_degenerate_attention_is_exact():
     assert out["alpha_max"] > 0.999
 
 
-def test_sensitivity_rnn_underflows_far_earlier_than_attention():
-    """Kernbefund: das RNN unterlaeuft float64 (exakt 0.0) lange bevor
-    Attention auch nur annaehernd verschwindet."""
+def test_sensitivity_rnn_vanishes_far_earlier_than_attention():
+    """Kernbefund: die RNN-Empfindlichkeit verschwindet exponentiell (T=300: ~6e-21, exakt
+    gemessen, keine Gleitkomma-Null), Attention bleibt eine normale Zahl."""
     s_rnn = m.sensitivity_to_signal(m.RNN(8, seed=0), T=300)
     s_att = m.sensitivity_to_signal(m.Attention(8, seed=0), T=300)
-    assert s_rnn == 0.0
+    assert 0.0 < s_rnn < 1e-18
     assert s_att > 1e-6
 
 
