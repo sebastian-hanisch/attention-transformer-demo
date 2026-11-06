@@ -107,8 +107,10 @@ scheiterte bei jedem $T$ vollständig (0 %), weil die Anfrage selbst kein brauch
 Behoben durch eine dedizierte, gelernte, **inhaltsunabhängige** Anfrage (ein "Klassifikations-Token"
 -Muster). Selbst danach scheiterte großes $T$ weiterhin, weil reine inhaltsbasierte Aufmerksamkeit
 bei sehr großem $T$ statistisch mit Extremwert-Rauschen verwechselt wird (das Maximum vieler
-Rauschziehungen kann die echte Signalgröße erreichen/übertreffen) – behoben durch eine feste
-Sinus-Positionskodierung.
+Rauschziehungen kann die echte Signalgröße erreichen/übertreffen) – gemildert durch eine feste
+Sinus-Positionskodierung, die das Problem aber nicht löst: bei $T=80$ bleibt die Erfolgsquote bei
+17 %, bei $T=150$ bei 0 % (gemessen ist nur „besser als ohne“; eine Ablation ohne Kodierung steht
+in keinem Test).
 
 **Bewusste Plan-Anpassung:** die ursprünglich geplante Kaltstart-T-Sweep-Messung wäre – wie in
 Stück 4/5 gelernt – über viele Trainingsepochen chaotisch plattform-/seed-abhängig gewesen. Der

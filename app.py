@@ -64,6 +64,19 @@ st.markdown(
     "Ausgabe stattdessen als gewichtete Summe über ALLE Zeitschritte gleichzeitig - **direkter "
     "Zugriff statt Weitergabe.** Das ist das letzte Stück der Neuronale-Netze-Reihe."
 )
+
+# erklaerseite:einfach:start (erzeugt von tools/set_demo_explainer.py (Website-Repo) aus tools/content/explainers/attention-transformer-erklaert.json, nicht von Hand ändern)
+with st.expander("💬 In einfachen Worten"):
+    st.markdown(
+        """
+Ein lernendes Programm bekommt eine lange Zahlenreihe. Nur die erste Zahl trägt den Hinweis, alle anderen sind zufälliges Rauschen. Ältere Bauarten reichen ihren Merkzettel Schritt für Schritt weiter, und der Anfang verblasst unterwegs. **Aufmerksamkeit** (Attention) sieht stattdessen alle Stellen gleichzeitig an und verteilt ein festes Maß an Gewicht auf sie.
+
+Die Demo misst, wie stark das Ergebnis auf die erste Zahl reagiert, bevor das Programm geübt hat. Bei Aufmerksamkeit sinkt dieser Wert mit der Länge nur langsam, bei den älteren Bauarten rasch. Ehrlich gezeigt wird auch der Haken: Beim Üben aus einem Zufallsstart gelingt das Lernen bei langen Reihen trotzdem seltener.
+
+[Ausführlich und verständlich erklärt, mit Fachteil](https://sebastianhanisch.net/attention-transformer-erklaert.html)
+        """
+    )
+# erklaerseite:einfach:end
 st.caption(
     "Stück 6 (LETZTES, Kind von LSTM) der 'Neuronale Netze'-Reihe. Die Linie ist damit "
     "vollständig: Perceptron → MLP+Backpropagation → {CNN, RNN → LSTM → Attention/Transformer}."
@@ -188,6 +201,25 @@ st.markdown(
 )
 
 with st.expander("📐 Mathematische Formulierung"):
+    # erklaerseite:lesehilfe:start (erzeugt von tools/set_demo_explainer.py (Website-Repo) aus tools/content/explainers/attention-transformer-erklaert.json, nicht von Hand ändern)
+    st.markdown(
+        r"""
+**Lesehilfe.** Gegeben ist eine Zahlenreihe der Länge $T$, deren erste Zahl ein Vorzeichen $y$ trägt, der Rest ist Rauschen. Gesucht ist $y$ aus einem Ausgabewert $s$, und wie stark $s$ auf die erste Zahl reagiert.
+
+| Symbol | Bedeutung |
+|---|---|
+| $T$, $t$ | Länge der Reihe bzw. eine Stelle darin, von $0$ an gezählt |
+| $d$ | Einbettungsdimension: Länge des Vektors, der jede Stelle beschreibt |
+| $q$ | gelernte Anfrage: womit jede Stelle verglichen wird |
+| $k_t$, $v_t$ | Schlüssel und Wert der Stelle $t$ |
+| $\alpha_t$ | Aufmerksamkeitsgewicht der Stelle $t$; alle Gewichte summieren sich zu eins |
+| out | Ausgabe der Aufmerksamkeit: gewichtete Summe der Werte |
+| $|\partial s/\partial x_0|$ | Empfindlichkeit: wie stark sich $s$ ändert, wenn sich die erste Zahl $x_0$ winzig ändert |
+
+[Schritt für Schritt erklärt, mit Herleitung und Literatur](https://sebastianhanisch.net/attention-transformer-erklaert.html#fachleute)
+        """
+    )
+    # erklaerseite:lesehilfe:end
     st.markdown(
         r"""
 **Aufmerksamkeit:** $\alpha_t=\text{softmax}_t(q\cdot k_t/\sqrt{d})$, $\text{out}=\sum_t \alpha_t v_t$.
