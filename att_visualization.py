@@ -25,7 +25,7 @@ def build_sequence_figure(seq: np.ndarray, label: float, title: str = ""):
     return fig
 
 
-def build_attention_weights_figure(alpha: np.ndarray, title="Aufmerksamkeitsgewichte α"):
+def build_attention_weights_figure(alpha: np.ndarray, title="Attention-Gewichte α"):
     fig = go.Figure(go.Bar(x=list(range(len(alpha))), y=alpha, marker_color=COLOR_ATT))
     fig.add_vline(x=C.SIGNAL_POS, line_dash="dot", line_color=COLOR_RNN,
                  annotation_text="Signalposition")

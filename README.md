@@ -6,7 +6,7 @@ Stück 6 (**letztes Stück**) der **Neuronale-Netze-Reihe** der "Konzepte"-Reihe
 [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning.
 Stück 4 und 5 zeigten: RNN und LSTM müssen Information Schritt für Schritt durch die Zeit
 **weiterreichen** – das kostet Gradientenkraft (RNN: exponentiell, LSTM: langsamer, aber immer
-noch). **Aufmerksamkeit** (Vaswani et al. 2017) berechnet die Ausgabe stattdessen als gewichtete
+noch). **Attention** (Vaswani et al. 2017) berechnet die Ausgabe stattdessen als gewichtete
 Summe über ALLE Zeitschritte gleichzeitig – **direkter Zugriff statt Weitergabe.** Diese Demo
 zeigt sowohl den strukturellen Vorteil als auch eine echte, ehrliche Einschränkung: der Vorteil
 ist real, aber er macht das Training bei großem $T$ nicht automatisch zuverlässig.
@@ -45,8 +45,8 @@ Eingabeschritt. Diese Demo prüft, ob das die in Stück 4/5 gefundenen Probleme 
 | Hypothese | Ergebnis |
 |---|---|
 | Sensitivität auf die Signalposition bleibt über einen viel größeren $T$-Bereich brauchbar als bei RNN/LSTM | ✅ bei $T=1200$: RNN $1{,}4\cdot10^{-83}$, LSTM $1{,}0\cdot10^{-23}$, Attention $1{,}0\cdot10^{-3}$ |
-| Gradienten-Check (Rückwärtspass durch Softmax-Aufmerksamkeit) unter $10^{-6}$ | ✅ $1{,}6\cdot10^{-8}$ |
-| Entartete (quasi-One-Hot) Aufmerksamkeit reduziert sich exakt auf $\text{out}=v_j$ | ✅ identische Ausgabe ($0{,}186265=0{,}186265$) |
+| Gradienten-Check (Rückwärtspass durch Softmax-Attention) unter $10^{-6}$ | ✅ $1{,}6\cdot10^{-8}$ |
+| Entartete (quasi-One-Hot) Attention reduziert sich exakt auf $\text{out}=v_j$ | ✅ identische Ausgabe ($0{,}186265=0{,}186265$) |
 | ⚠️ **Ehrlich geprüft, nicht einfach angenommen:** die viel mildere Verdünnung reicht automatisch für hohe Kaltstart-Erfolgsquote bei jedem $T$ | ❌ **Reicht nicht automatisch** – Erfolgsquote sinkt trotzdem mit $T$ (100 % → 0 % zwischen $T=10$ und $T=150$), nur langsamer und aus einem anderen Grund als beim RNN (siehe unten) |
 
 ## Befunde (gemessen, keine Behauptungen)
@@ -82,18 +82,18 @@ allein – gleiche Kaltstart-Bedingungen wie RNN/LSTM in Stück 4/5):
 
 - `att_scenario.py` – Signal-in-Rauschen-Sequenzgenerator (eigenständige Kopie aus lstm-demo).
 - `att_model.py` – `Attention` (Einbettung + feste Sinus-Positionskodierung + gelernte
-  Anfrage/Schlüssel/Wert + Softmax-Aufmerksamkeit + Rückwärtspass von Hand), `RNN`- und
+  Anfrage/Schlüssel/Wert + Softmax-Attention + Rückwärtspass von Hand), `RNN`- und
   `LSTM`-Referenzen (eigenständige Kopien für den direkten Sensitivitäts-Vergleich), `SGD`,
   `sensitivity_to_signal()` (trainingsfreie Empfindlichkeitsmessung).
 - `att_evaluation.py` – Sensitivitäts-Sweep (schnell, kein Training), Kaltstart-Erfolgsquote-Sweep
-  (teuer), Gradienten-Check, Korrektheits-Kette (entartete Aufmerksamkeit).
-- `att_visualization.py` – Plotly: Sequenz-Anzeige, Aufmerksamkeitsgewichte, Sensitivität-vs-T
+  (teuer), Gradienten-Check, Korrektheits-Kette (entartete Attention).
+- `att_visualization.py` – Plotly: Sequenz-Anzeige, Attention-Gewichte, Sensitivität-vs-T
   (log-log, RNN/LSTM/Attention), Erfolgsquote-vs-T.
 
 ## Was die App zeigt
 
 Sequenzlänge, Einbettungsdimension, Trainingsgröße, Rauschen, Lernrate, Epochen und Seed in der
-Sidebar; eine Beispielsequenz mit den gelernten Aufmerksamkeitsgewichten daneben; Testgenauigkeit
+Sidebar; eine Beispielsequenz mit den gelernten Attention-Gewichten daneben; Testgenauigkeit
 für die aktuelle Konfiguration; der Sensitivitäts-Sweep (RNN/LSTM/Attention, schnell, kein
 Spinner nötig) als zentraler Befund; der Kaltstart-Erfolgsquote-Sweep (mit Spinner und
 Zeitangabe, ca. 15 Sekunden); ein "📐"-Abschnitt mit Korrektheits-Kette, Gradienten-Check,
@@ -101,11 +101,11 @@ Literatur und einem SOTA-Ausblick (Mamba/State-Space-Modelle).
 
 ## Was nicht funktioniert hat / Grenzen
 
-**Zwei echte Fehlschläge auf dem Weg zur funktionierenden Aufmerksamkeit:** Die erste Version
+**Zwei echte Fehlschläge auf dem Weg zur funktionierenden Attention:** Die erste Version
 leitete die Anfrage aus dem letzten (irrelevanten, verrauschten) Zeitschritt ab – das Training
 scheiterte bei jedem $T$ vollständig (0 %), weil die Anfrage selbst kein brauchbares Signal trug.
 Behoben durch eine dedizierte, gelernte, **inhaltsunabhängige** Anfrage (ein "Klassifikations-Token"
--Muster). Selbst danach scheiterte großes $T$ weiterhin, weil reine inhaltsbasierte Aufmerksamkeit
+-Muster). Selbst danach scheiterte großes $T$ weiterhin, weil reine inhaltsbasierte Attention
 bei sehr großem $T$ statistisch mit Extremwert-Rauschen verwechselt wird (das Maximum vieler
 Rauschziehungen kann die echte Signalgröße erreichen/übertreffen) – gemildert durch eine feste
 Sinus-Positionskodierung, die das Problem aber nicht löst: bei $T=80$ bleibt die Erfolgsquote bei
@@ -195,7 +195,7 @@ streamlit run app.py
 
 - Vaswani, A. et al. (2017). *Attention Is All You Need.* NeurIPS 2017 (arXiv:1706.03762).
 - Bahdanau, D., Cho, K. & Bengio, Y. (2014). *Neural Machine Translation by Jointly Learning to
-  Align and Translate.* arXiv:1409.0473 (früher Aufmerksamkeits-Mechanismus vor Vaswani et al.).
+  Align and Translate.* arXiv:1409.0473 (früher Attention-Mechanismus vor Vaswani et al.).
 - Gu, A. & Dao, T. (2023/2024). *Mamba: Linear-Time Sequence Modeling with Selective State
   Spaces.* (State-Space-Modelle als linearer Ausblick zum quadratischen Attention-Aufwand –
   bewusst nicht gebaut, siehe SOTA-Hinweis in der App.)

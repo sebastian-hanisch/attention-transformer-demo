@@ -5,7 +5,7 @@ Sebastian Hanisch - Operations Research und Machine Learning
 Stück 6 (LETZTES) der "Neuronale Netze"-Reihe der "Konzepte"-Reihe:
 Perceptron -> MLP+Backpropagation -> {CNN, RNN -> LSTM -> Attention/Transformer}.
 RNN und LSTM müssen Information schrittweise durch die Zeit WEITERREICHEN.
-Aufmerksamkeit (Vaswani et al. 2017) gibt jedem Ausgabeschritt direkten
+Attention (Vaswani et al. 2017) gibt jedem Ausgabeschritt direkten
 Zugriff auf JEDEN Eingabeschritt, ohne Rekursion - die "wie weit muss
 Information wandern"-Frage verschwindet strukturell.
 
@@ -60,7 +60,7 @@ st.title("🧠 Attention/Transformer — Zugriff statt Weitergabe")
 st.markdown(
     "RNN (Stück 4) und LSTM (Stück 5) müssen Information über Zwischenzustände Schritt für "
     "Schritt durch die Zeit **weiterreichen** - das kostet Gradientenkraft (RNN: exponentiell, "
-    "LSTM: langsamer, aber immer noch). **Aufmerksamkeit** (Vaswani et al. 2017) berechnet die "
+    "LSTM: langsamer, aber immer noch). **Attention** (Vaswani et al. 2017) berechnet die "
     "Ausgabe stattdessen als gewichtete Summe über ALLE Zeitschritte gleichzeitig - **direkter "
     "Zugriff statt Weitergabe.** Das ist das letzte Stück der Neuronale-Netze-Reihe."
 )
@@ -82,7 +82,7 @@ st.caption(
     "vollständig: Perceptron → MLP+Backpropagation → {CNN, RNN → LSTM → Attention/Transformer}."
 )
 
-with st.expander("So funktioniert Aufmerksamkeit", expanded=True):
+with st.expander("So funktioniert Attention", expanded=True):
     st.markdown(
         "1. Jede Position bekommt einen Schlüssel $k_t$ und einen Wert $v_t$ (aus der "
         "Einbettung + einer festen Positionskodierung).\n"
@@ -151,7 +151,7 @@ with col_alpha:
                     use_container_width=True)
     st.caption(
         "Je höher der Balken an Position 0 (gestrichelte Linie), desto stärker "
-        "konzentriert sich die gelernte Aufmerksamkeit auf die Signalposition."
+        "konzentriert sich die gelernte Attention auf die Signalposition."
     )
 
 st.subheader("🎯 Was am Ende steht")
@@ -185,7 +185,7 @@ st.caption(
     "zuverlässiges Training bei jedem T - bei diesem einfachen Aufbau (ein Kopf, keine "
     "Stapelverarbeitung) sinkt die Erfolgsquote mit wachsendem T trotzdem, nur langsamer und "
     "aus einem anderen Grund als beim RNN (hier: mehr konkurrierende Positionen erschweren das "
-    "Schärfen der Aufmerksamkeit, keine exponentielle Gradientenkatastrophe)."
+    "Schärfen der Attention, keine exponentielle Gradientenkatastrophe)."
 )
 
 st.subheader("🚧 Wo die Annahmen enden")
@@ -212,9 +212,9 @@ with st.expander("📐 Mathematische Formulierung"):
 | $d$ | Einbettungsdimension: Länge des Vektors, der jede Stelle beschreibt |
 | $q$ | gelernte Anfrage: womit jede Stelle verglichen wird |
 | $k_t$, $v_t$ | Schlüssel und Wert der Stelle $t$ |
-| $\alpha_t$ | Aufmerksamkeitsgewicht der Stelle $t$; alle Gewichte summieren sich zu eins |
-| out | Ausgabe der Aufmerksamkeit: gewichtete Summe der Werte |
-| $|\partial s/\partial x_0|$ | Empfindlichkeit: wie stark sich $s$ ändert, wenn sich die erste Zahl $x_0$ winzig ändert |
+| $\alpha_t$ | Attention-Gewicht der Stelle $t$; alle Gewichte summieren sich zu eins |
+| out | Ausgabe der Attention: gewichtete Summe der Werte |
+| $\lvert\partial s/\partial x_0\rvert$ | Empfindlichkeit: wie stark sich $s$ ändert, wenn sich die erste Zahl $x_0$ winzig ändert |
 
 [Schritt für Schritt erklärt, mit Herleitung und Literatur](https://sebastianhanisch.net/attention-transformer-erklaert.html#fachleute)
         """
@@ -222,16 +222,16 @@ with st.expander("📐 Mathematische Formulierung"):
     # erklaerseite:lesehilfe:end
     st.markdown(
         r"""
-**Aufmerksamkeit:** $\alpha_t=\text{softmax}_t(q\cdot k_t/\sqrt{d})$, $\text{out}=\sum_t \alpha_t v_t$.
+**Attention:** $\alpha_t=\text{softmax}_t(q\cdot k_t/\sqrt{d})$, $\text{out}=\sum_t \alpha_t v_t$.
 
-**Korrektheits-Kette (entartete Aufmerksamkeit):** wird $\alpha$ auf eine Position $j$
+**Korrektheits-Kette (entartete Attention):** wird $\alpha$ auf eine Position $j$
 konzentriert ($\alpha_j\approx1$, alle anderen $\approx0$), muss $\text{out}\approx v_j$ gelten
 - von Hand nachrechenbar.
 """
     )
     check = _reduction_check()
     c1, c2 = st.columns(2)
-    c1.metric("Entartete Aufmerksamkeit", f"{check['s_degenerate']:.6f}")
+    c1.metric("Entartete Attention", f"{check['s_degenerate']:.6f}")
     c2.metric("Manuell (nur v_j)", f"{check['s_manual']:.6f}")
     st.metric("Identisch?", "Ja" if check["identical"] else "Nein (Fehler!)")
     st.markdown("**Gradienten-Check** (gegen finite Differenzen):")

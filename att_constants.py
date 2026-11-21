@@ -22,7 +22,7 @@ PRESETS = {
     "kurz": dict(
         label="Kurze Sequenz — gelingt",
         T=10, hidden=8, n_train=60, n_test=40, noise=0.3, eta=0.3, epochs=60, seed=0,
-        help="Bei T=10 lernt Attention zuverlässig - die Aufmerksamkeit konzentriert sich "
+        help="Bei T=10 lernt Attention zuverlässig - die Attention konzentriert sich "
              "sichtbar auf die Signalposition.",
     ),
     "lang": dict(

@@ -1,4 +1,4 @@
-"""Einschichtige Selbstaufmerksamkeit (Vaswani et al. 2017, ein Kopf) mit
+"""Einschichtige Self-Attention (Vaswani et al. 2017, ein Kopf) mit
 Rueckwaertspass von Hand, plus RNN- und LSTM-Referenzen (eigenstaendige
 Kopien aus Stueck 4/5) fuer den direkten Vergleich.
 

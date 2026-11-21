@@ -1,6 +1,6 @@
 """Kennzahlen: Settings-Dataclass, analyse()-Einstiegspunkt,
 Sensitivitaets-Sweep (schnell, kein Training), Kaltstart-T-Sweep (teuer),
-Gradienten-Check, Korrektheits-Kette (entartete Aufmerksamkeit)."""
+Gradienten-Check, Korrektheits-Kette (entartete Attention)."""
 from dataclasses import dataclass
 
 import numpy as np
@@ -103,7 +103,7 @@ def gradient_check(T: int = 6, hidden: int = 4, seed: int = 2, eps: float = 1e-5
 
 def reduction_check_degenerate_attention(hidden: int = 4, T: int = 5, focus_pos: int = 2,
                                          seed: int = 0) -> dict:
-    """Aufmerksamkeit mit einer einzigen Position im Fokus (entartete,
+    """Attention mit einer einzigen Position im Fokus (entartete,
     quasi-One-Hot-Verteilung): der Ausgang muss auf den WERT an dieser einen
     Position hinauslaufen (out=V[focus_pos]), von Hand nachrechenbar -
     unabhaengig von allen anderen Positionen."""
