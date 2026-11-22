@@ -55,7 +55,7 @@ def t_sweep(
     """Kaltstart-Erfolgsquote (SGD, kein Curriculum) ueber n_inits
     Zufalls-Inits, fuer jedes T. Ehrlicher Befund (siehe README): trotz der
     viel milderen Sensitivitaets-Verduennung bleibt das Training bei diesem
-    einfachen Aufbau (ein Kopf, keine Stapelverarbeitung) jenseits von T~10
+    einfachen Aufbau (ein Kopf, keine Mini-Batches) jenseits von T~10
     schwierig - strukturelles Potenzial allein reicht nicht."""
     rows = []
     for T in values:

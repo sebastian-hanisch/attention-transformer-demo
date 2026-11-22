@@ -29,7 +29,7 @@ $\approx 1\cdot10^{-83}$ – noch darstellbar, aber praktisch null), das LSTM f�
 ebenfalls geometrisch (bei $T=1200$ nur noch $\approx 1\cdot10^{-23}$), Attention fällt nur **mild** (durch die Softmax-Mittelung über mehr
 Positionen verdünnt) und bleibt bei $T=1200$ eine normale, benutzbare Zahl ($\approx 10^{-3}$).
 **Aber:** diese viel mildere Verdünnung übersetzt sich NICHT automatisch in zuverlässiges
-Kaltstart-Training bei jedem $T$ – bei diesem einfachen Aufbau (ein Kopf, keine Stapelverarbeitung)
+Kaltstart-Training bei jedem $T$ – bei diesem einfachen Aufbau (ein Kopf, keine Mini-Batches)
 sinkt die Erfolgsquote mit wachsendem $T$ trotzdem (100 %/83 %/17 %/0 % bei $T=10/40/80/150$), nur
 aus einem anderen Grund als beim RNN.
 
@@ -45,7 +45,7 @@ Eingabeschritt. Diese Demo prüft, ob das die in Stück 4/5 gefundenen Probleme 
 | Hypothese | Ergebnis |
 |---|---|
 | Sensitivität auf die Signalposition bleibt über einen viel größeren $T$-Bereich brauchbar als bei RNN/LSTM | ✅ bei $T=1200$: RNN $1{,}4\cdot10^{-83}$, LSTM $1{,}0\cdot10^{-23}$, Attention $1{,}0\cdot10^{-3}$ |
-| Gradienten-Check (Rückwärtspass durch Softmax-Attention) unter $10^{-6}$ | ✅ $1{,}6\cdot10^{-8}$ |
+| Gradienten-Check (Backward-Pass durch Softmax-Attention) unter $10^{-6}$ | ✅ $1{,}6\cdot10^{-8}$ |
 | Entartete (quasi-One-Hot) Attention reduziert sich exakt auf $\text{out}=v_j$ | ✅ identische Ausgabe ($0{,}186265=0{,}186265$) |
 | ⚠️ **Ehrlich geprüft, nicht einfach angenommen:** die viel mildere Verdünnung reicht automatisch für hohe Kaltstart-Erfolgsquote bei jedem $T$ | ❌ **Reicht nicht automatisch** – Erfolgsquote sinkt trotzdem mit $T$ (100 % → 0 % zwischen $T=10$ und $T=150$), nur langsamer und aus einem anderen Grund als beim RNN (siehe unten) |
 
@@ -82,7 +82,7 @@ allein – gleiche Kaltstart-Bedingungen wie RNN/LSTM in Stück 4/5):
 
 - `att_scenario.py` – Signal-in-Rauschen-Sequenzgenerator (eigenständige Kopie aus lstm-demo).
 - `att_model.py` – `Attention` (Einbettung + feste Sinus-Positionskodierung + gelernte
-  Anfrage/Schlüssel/Wert + Softmax-Attention + Rückwärtspass von Hand), `RNN`- und
+  Anfrage/Schlüssel/Wert + Softmax-Attention + Backward-Pass von Hand), `RNN`- und
   `LSTM`-Referenzen (eigenständige Kopien für den direkten Sensitivitäts-Vergleich), `SGD`,
   `sensitivity_to_signal()` (trainingsfreie Empfindlichkeitsmessung).
 - `att_evaluation.py` – Sensitivitäts-Sweep (schnell, kein Training), Kaltstart-Erfolgsquote-Sweep
@@ -92,7 +92,7 @@ allein – gleiche Kaltstart-Bedingungen wie RNN/LSTM in Stück 4/5):
 
 ## Was die App zeigt
 
-Sequenzlänge, Einbettungsdimension, Trainingsgröße, Rauschen, Lernrate, Epochen und Seed in der
+Sequenzlänge, Einbettungsdimension, Trainingsgröße, Rauschen, Lernrate, Epochen und Zufalls-Seed in der
 Sidebar; eine Beispielsequenz mit den gelernten Attention-Gewichten daneben; Testgenauigkeit
 für die aktuelle Konfiguration; der Sensitivitäts-Sweep (RNN/LSTM/Attention, schnell, kein
 Spinner nötig) als zentraler Befund; der Kaltstart-Erfolgsquote-Sweep (mit Spinner und
@@ -129,7 +129,7 @@ in float64 durchaus darstellbar. Die Messung nutzt jetzt Complex-Step; die Reihe
 ändert sich nicht, nur die Behauptung „fällt auf exakt Null“.
 
 **Grenzen:** ein Kopf, eine Schicht (echte Transformer stapeln viele Köpfe/Schichten). Nur
-Positions-, keine relative Ordnungskodierung. Kein Multi-Head, keine Lernraten-Zeitpläne, kein
+Positions-, keine relative Ordnungskodierung. Kein Multi-Head, keine Learning-Rate-Schedules, kein
 Layer-Norm/Residual – bewusst außerhalb dieses Rahmens, um jeden Mechanismus einzeln
 nachvollziehbar zu halten.
 

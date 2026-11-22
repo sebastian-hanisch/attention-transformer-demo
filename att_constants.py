@@ -30,6 +30,6 @@ PRESETS = {
         T=150, hidden=8, n_train=60, n_test=40, noise=0.3, eta=0.3, epochs=60, seed=0,
         help="Die Empfindlichkeit auf die Signalposition bleibt strukturell hoch (siehe "
              "Sensitivitäts-Chart) - aber dieses einfache Training (ein Kopf, keine "
-             "Stapelverarbeitung) findet hier trotzdem oft keine Lösung.",
+             "Mini-Batches) findet hier trotzdem oft keine Lösung.",
     ),
 }

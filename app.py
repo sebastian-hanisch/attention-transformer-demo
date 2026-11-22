@@ -128,10 +128,10 @@ with st.sidebar:
     epochs = st.slider("Epochen", C.EPOCHS_MIN, C.EPOCHS_MAX, ss["epochs"], step=10,
                        key="widget_epochs", on_change=pr.store_from_widget, args=("epochs",))
     ss["epochs"] = epochs
-    seed = st.number_input("Seed", value=ss["seed"], step=1, key="widget_seed",
+    seed = st.number_input("Zufalls-Seed", value=ss["seed"], step=1, key="widget_seed",
                            on_change=pr.store_from_widget, args=("seed",))
     ss["seed"] = seed
-    st.button("🎲 Zufälliger Seed", on_click=pr.randomize_seed)
+    st.button("🎲 Neuer Zufalls-Seed", on_click=pr.randomize_seed)
     n_test = C.N_TEST_DEFAULT
 
 pr.sync_query_params(dict(T=T, hidden=hidden, n_train=n_train, n_test=n_test, noise=noise,
@@ -183,7 +183,7 @@ st.plotly_chart(viz.build_t_sweep_figure(sweep), key="t_sweep_chart", use_contai
 st.caption(
     "Ehrlicher Befund: die viel mildere Verdünnung übersetzt sich NICHT automatisch in "
     "zuverlässiges Training bei jedem T - bei diesem einfachen Aufbau (ein Kopf, keine "
-    "Stapelverarbeitung) sinkt die Erfolgsquote mit wachsendem T trotzdem, nur langsamer und "
+    "Mini-Batches) sinkt die Erfolgsquote mit wachsendem T trotzdem, nur langsamer und "
     "aus einem anderen Grund als beim RNN (hier: mehr konkurrierende Positionen erschweren das "
     "Schärfen der Attention, keine exponentielle Gradientenkatastrophe)."
 )
@@ -193,8 +193,8 @@ st.markdown(
     "| Annahme | Was passiert, wenn sie verletzt ist | Wer setzt an |\n"
     "|---|---|---|\n"
     "| Milde Verdünnung reicht für Trainierbarkeit bei jedem T | Reicht nicht automatisch - "
-    "die Erfolgsquote sinkt trotzdem mit T (siehe oben) | Mehrere Köpfe, Stapelverarbeitung, "
-    "Lernraten-Zeitpläne (außerhalb dieses Rahmens) |\n"
+    "die Erfolgsquote sinkt trotzdem mit T (siehe oben) | Mehrere Köpfe, Mini-Batches, "
+    "Learning-Rate-Schedules (außerhalb dieses Rahmens) |\n"
     "| Nur EIN Kopf/EINE Schicht | Echte Transformer stapeln viele Köpfe/Schichten | — |\n"
     "| Position zählt, nicht Reihenfolge relativ zueinander | Aufgaben mit relativer Ordnung "
     "bräuchten andere Kodierungen | — |\n"
